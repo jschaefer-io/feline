@@ -4,6 +4,8 @@ import (
 	"fmt"
 )
 
+// token.Value.(float64)
+
 func main() {
 	_, err := prepareFile("./testfile.feline")
 	if err != nil {

@@ -13,14 +13,15 @@ const (
 	Stop           TokenType = 0
 	Operator       TokenType = 1
 	String         TokenType = 2
-	Char           TokenType = 3
-	Number         TokenType = 4
-	Keyword        TokenType = 5
-	Whitespace     TokenType = 6
-	Parenthesis    TokenType = 7
-	CurlyBrackets  TokenType = 8
-	SquareBrackets TokenType = 9
-	Delimiter      TokenType = 10
+	Boolean        TokenType = 3
+	Char           TokenType = 4
+	Number         TokenType = 5
+	Keyword        TokenType = 6
+	Whitespace     TokenType = 7
+	Parenthesis    TokenType = 8
+	CurlyBrackets  TokenType = 9
+	SquareBrackets TokenType = 10
+	Delimiter      TokenType = 11
 )
 
 type Token struct {
@@ -33,7 +34,7 @@ func determineType(char rune) TokenType {
 	if strings.Index(" \t\n\r", charString) >= 0 {
 		return Whitespace
 	}
-	if strings.Index("+-*/%", charString) >= 0 {
+	if strings.Index("+-*/%=!", charString) >= 0 {
 		return Operator
 	}
 	if strings.Index("()", charString) >= 0 {
@@ -149,10 +150,22 @@ func fillToken(token *Token, input *string, position *int, length *int) (int, er
 	return offset, nil
 }
 
+func determineBoolean(token *Token) {
+	value := token.Value.(string)
+	valueLower := strings.ToLower(value)
+	if valueLower == "true" || valueLower == "false" {
+		token.Value, _ = strconv.ParseBool(value)
+		token.Type = Boolean
+	}
+}
+
 func NextToken(input *string, position *int, length *int) (Token, int, error) {
 	currentChar := rune((*input)[*position])
 	tokenType := determineType(currentChar)
 	token, _ := getTokenFromType(tokenType)
 	offset, err := fillToken(&token, input, position, length)
+	if token.Type == Keyword {
+		determineBoolean(&token)
+	}
 	return token, offset, err
 }
