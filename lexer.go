@@ -33,12 +33,11 @@ func (lexer *Lexer) GetTokenAt(position int) (Token, error) {
 	return lexer.tokens[position], nil
 }
 
-
 func (lexer *Lexer) handlePosition() error {
-	token, offset := NextToken(&lexer.command, &lexer.position, &lexer.length)
+	token, offset, err := NextToken(&lexer.command, &lexer.position, &lexer.length)
 	lexer.tokens = append(lexer.tokens, token)
 	lexer.position += offset
-	return nil
+	return err
 }
 
 func (lexer *Lexer) increment() bool {
@@ -46,8 +45,12 @@ func (lexer *Lexer) increment() bool {
 	return lexer.position < lexer.length
 }
 
-func (lexer *Lexer) Tokenize() {
+func (lexer *Lexer) Tokenize() error {
 	for lexer.increment() {
-		_ = lexer.handlePosition()
+		err := lexer.handlePosition()
+		if err != nil {
+			return err
+		}
 	}
+	return nil
 }

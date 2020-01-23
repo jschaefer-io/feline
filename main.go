@@ -4,12 +4,25 @@ import (
 	"fmt"
 )
 
-var command string = "test(name string, num int): int{print_r(num + \" Hello \" + name);}"
-
 func main() {
-	commandLexer := NewLexer(&command)
-	commandLexer.Tokenize()
-	for _, token := range commandLexer.tokens {
-		fmt.Printf("Type: %d | Value: %s\n", token.Type, token.Value)
+	_, err := prepareFile("./testfile.feline")
+	if err != nil {
+		panic(err)
 	}
+}
+
+func prepareFile(path string) (File, error) {
+	file := NewFile(path)
+	err := file.Prepare()
+	if err != nil {
+		return File{}, err
+	}
+	for _, line := range file.lines {
+		fmt.Printf("Line Number %d:", line.number)
+		for _, token := range line.tokens {
+			fmt.Println(token)
+		}
+	}
+	//fmt.Println(file)
+	return file, nil
 }

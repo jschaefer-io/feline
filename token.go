@@ -1,13 +1,16 @@
 package main
 
 import (
+	"errors"
+	"fmt"
+	"strconv"
 	"strings"
 )
 
 type TokenType uint8
 
 const (
-	UndefinedToken TokenType = 0
+	Stop           TokenType = 0
 	Operator       TokenType = 1
 	String         TokenType = 2
 	Char           TokenType = 3
@@ -15,13 +18,14 @@ const (
 	Keyword        TokenType = 5
 	Whitespace     TokenType = 6
 	Parenthesis    TokenType = 7
-	Brackets       TokenType = 8
-	Delimiter      TokenType = 9
+	CurlyBrackets  TokenType = 8
+	SquareBrackets TokenType = 9
+	Delimiter      TokenType = 10
 )
 
 type Token struct {
 	Type  TokenType
-	Value string
+	Value interface{}
 }
 
 func determineType(char rune) TokenType {
@@ -36,7 +40,10 @@ func determineType(char rune) TokenType {
 		return Parenthesis
 	}
 	if strings.Index("{}", charString) >= 0 {
-		return Brackets
+		return CurlyBrackets
+	}
+	if strings.Index("[]", charString) >= 0 {
+		return SquareBrackets
 	}
 	if char == '"' {
 		return String
@@ -46,6 +53,9 @@ func determineType(char rune) TokenType {
 	}
 	if char == '\'' {
 		return Char
+	}
+	if char == ';' {
+		return Stop
 	}
 	if strings.Index("0123456789.", charString) >= 0 {
 		return Number
@@ -108,30 +118,41 @@ func collectUntilChange(tokenType TokenType, input *string, position *int, lengt
 	return value, pos - *position
 }
 
-func fillToken(token *Token, input *string, position *int, length *int) int {
+func fillToken(token *Token, input *string, position *int, length *int) (int, error) {
+	var value string
 	offset := 0
 	switch token.Type {
 	case Char:
-		var value string
 		value, offset = collectUntilMatch("'", 2, input, position, length)
-		token.Value = strings.Trim(value, "'")
+		value = strings.Trim(value, "'")
+		length := len(value)
+		if length != 1 {
+			return offset, errors.New(fmt.Sprintf("can not identify '%s' as type char", value))
+		}
+		token.Value = rune(value[0])
 		break
 	case String:
-		var value string
 		value, offset = collectUntilMatch("\"", 2, input, position, length)
 		token.Value = strings.Trim(value, "\"")
 		break
+	case Number:
+		value, offset = collectUntilChange(token.Type, input, position, length)
+		parsedValue, err := strconv.ParseFloat(value, 64)
+		if err != nil {
+			return offset, errors.New(fmt.Sprintf("can not identify \"%s\" as type number", value))
+		}
+		token.Value = parsedValue
 	default:
 		token.Value, offset = collectUntilChange(token.Type, input, position, length)
 		break
 	}
-	return offset
+	return offset, nil
 }
 
-func NextToken(input *string, position *int, length *int) (Token, int) {
+func NextToken(input *string, position *int, length *int) (Token, int, error) {
 	currentChar := rune((*input)[*position])
 	tokenType := determineType(currentChar)
 	token, _ := getTokenFromType(tokenType)
-	offset := fillToken(&token, input, position, length)
-	return token, offset
+	offset, err := fillToken(&token, input, position, length)
+	return token, offset, err
 }

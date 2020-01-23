@@ -1,3 +1,3 @@
-module github.com/jschaefer-io/felis
+module github.com/jschaefer-io/feline
 
 go 1.13
