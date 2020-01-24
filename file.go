@@ -44,9 +44,9 @@ func handleEscapedChars(content *string) string {
 	return newString
 }
 
-func (file *File) addLine(command *string) error {
+func (file *File) addLine(command *string, number int) error {
 	newLine := line{
-		number: len(file.lines) + 1,
+		number: number,
 	}
 	escapedCommand := handleEscapedChars(command)
 	commandLexer := NewLexer(&escapedCommand)
@@ -59,8 +59,18 @@ func (file *File) addLine(command *string) error {
 	for _, token := range commandLexer.tokens {
 		newLine.tokens = append(newLine.tokens, token)
 	}
-	file.lines = append(file.lines, newLine)
+	if len(newLine.tokens) > 0 {
+		file.lines = append(file.lines, newLine)
+	}
 	return nil
+}
+
+func (file *File) GetTokenList() []Token {
+	var tokens []Token
+	for _, line := range file.lines {
+		tokens = append(tokens, line.tokens...)
+	}
+	return tokens
 }
 
 func (file *File) Prepare() error {
@@ -71,9 +81,9 @@ func (file *File) Prepare() error {
 	scanner := bufio.NewScanner(openFile)
 
 	// Read line by line
-	for scanner.Scan() {
+	for lineNumber := 1; scanner.Scan(); lineNumber++ {
 		line := scanner.Text()
-		parseError := file.addLine(&line)
+		parseError := file.addLine(&line, lineNumber)
 		if parseError != nil {
 			return parseError
 		}

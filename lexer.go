@@ -35,7 +35,9 @@ func (lexer *Lexer) GetTokenAt(position int) (Token, error) {
 
 func (lexer *Lexer) handlePosition() error {
 	token, offset, err := NextToken(&lexer.command, &lexer.position, &lexer.length)
-	lexer.tokens = append(lexer.tokens, token)
+	if token.Type != Whitespace {
+		lexer.tokens = append(lexer.tokens, token)
+	}
 	lexer.position += offset
 	return err
 }

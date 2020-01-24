@@ -22,6 +22,7 @@ const (
 	CurlyBrackets  TokenType = 9
 	SquareBrackets TokenType = 10
 	Delimiter      TokenType = 11
+	Unknown        TokenType = 255
 )
 
 type Token struct {
@@ -29,12 +30,16 @@ type Token struct {
 	Value interface{}
 }
 
+func (token *Token) ToString() string {
+	return fmt.Sprintf("%d : \"%v\"", token.Type, token.Value)
+}
+
 func determineType(char rune) TokenType {
 	charString := string(char)
 	if strings.Index(" \t\n\r", charString) >= 0 {
 		return Whitespace
 	}
-	if strings.Index("+-*/%=!", charString) >= 0 {
+	if strings.Index("+-*/%=!<>", charString) >= 0 {
 		return Operator
 	}
 	if strings.Index("()", charString) >= 0 {
@@ -131,11 +136,9 @@ func fillToken(token *Token, input *string, position *int, length *int) (int, er
 			return offset, errors.New(fmt.Sprintf("can not identify '%s' as type char", value))
 		}
 		token.Value = rune(value[0])
-		break
 	case String:
 		value, offset = collectUntilMatch("\"", 2, input, position, length)
 		token.Value = strings.Trim(value, "\"")
-		break
 	case Number:
 		value, offset = collectUntilChange(token.Type, input, position, length)
 		parsedValue, err := strconv.ParseFloat(value, 64)
@@ -143,9 +146,14 @@ func fillToken(token *Token, input *string, position *int, length *int) (int, er
 			return offset, errors.New(fmt.Sprintf("can not identify \"%s\" as type number", value))
 		}
 		token.Value = parsedValue
-	default:
+	case Operator:
 		token.Value, offset = collectUntilChange(token.Type, input, position, length)
-		break
+	case Keyword:
+		token.Value, offset = collectUntilChange(token.Type, input, position, length)
+	case Whitespace:
+		token.Value, offset = collectUntilChange(token.Type, input, position, length)
+	default:
+		token.Value = string((*input)[*position])
 	}
 	return offset, nil
 }
