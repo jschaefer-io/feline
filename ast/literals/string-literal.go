@@ -9,7 +9,7 @@ func (s *StringLiteral) ToString() string {
 	return s.Value
 }
 
-func (s StringLiteral) Get() (interface{}, error) {
+func (s *StringLiteral) Get() (interface{}, error) {
 	return s.Value, nil
 }
 
