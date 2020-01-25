@@ -22,7 +22,6 @@ const (
 	CurlyBrackets  TokenType = 9
 	SquareBrackets TokenType = 10
 	Delimiter      TokenType = 11
-	Unknown        TokenType = 255
 )
 
 type Token struct {
@@ -88,21 +87,6 @@ func collectUntilMatch(needMatch string, count int, input *string, position *int
 				break
 			}
 		}
-	}
-	return value, pos - *position
-}
-
-func collectUntilNoMatch(needMatch string, input *string, position *int, length *int) (string, int) {
-	value := ""
-	var pos int
-	var currentChar string
-	for pos = *position; pos < *length; pos++ {
-		currentChar = string((*input)[pos])
-		if strings.Index(needMatch, currentChar) < 0 {
-			pos--
-			break
-		}
-		value += currentChar
 	}
 	return value, pos - *position
 }
