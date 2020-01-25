@@ -1,4 +1,4 @@
-package ast
+package literals
 
 import "strconv"
 

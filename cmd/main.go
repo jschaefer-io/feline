@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/jschaefer-io/feline/ast"
+	"github.com/jschaefer-io/feline/ast/literals"
+	"github.com/jschaefer-io/feline/ast/operators"
 	"github.com/jschaefer-io/feline/data_types"
 	"github.com/jschaefer-io/feline/files"
 	"github.com/jschaefer-io/feline/lexer"
@@ -31,10 +33,10 @@ func main() {
 }
 
 func buildAst(scope *parser.Scope) {
-	a := ast.NewStringLiteral("Number of hours: ")
-	b := ast.NewNumberLiteral(100)
-	op := ast.Addition{}
-	exp := ast.BinaryExpression{op, &a, &b}
+	a := literals.NewStringLiteral("Number of hours: ")
+	b := literals.NewNumberLiteral(100)
+	op := operators.Addition{}
+	exp := ast.BinaryExpression{&op, &a, &b}
 
 	res, err := exp.Get()
 	if err != nil {

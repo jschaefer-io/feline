@@ -1,10 +1,10 @@
-package ast
+package literals
 
 type LiteralType uint8
 
 const (
-	Number LiteralType = 0
-	String LiteralType = 1
+	Number  LiteralType = 0
+	String  LiteralType = 1
 )
 
 type Literal interface {

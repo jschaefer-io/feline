@@ -1,4 +1,4 @@
-package ast
+package literals
 
 type StringLiteral struct {
 	literalBase
