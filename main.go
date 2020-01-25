@@ -1,6 +1,10 @@
 package main
 
-import "fmt"
+import (
+	"encoding/json"
+	"errors"
+	"fmt"
+)
 
 // token.Value.(float64)
 
@@ -9,16 +13,39 @@ func main() {
 	if fileErr != nil {
 		panic(fileErr)
 	}
-	test(file)
+	scope, parseError := parseFile(file)
+	if parseError != nil {
+		panic(parseError)
+	}
+
+	bytes, _ := json.MarshalIndent(scope, "", "\t")
+	fmt.Println(string(bytes))
 }
 
-func test(file File) {
-	for _, line := range file.lines {
-		fmt.Printf("Line %d:", line.number)
-		for _, token := range line.tokens {
-			fmt.Println("\t" + token.ToString())
-		}
+func parseFile(file File) (Scope, error) {
+	queue := tokenListToParseQueue(file.GetTokenList())
+	itemGroup, err := NewParse(&queue, &Scope{})
+	if err != nil {
+		return Scope{}, err
 	}
+	if queue.len() > 0 {
+		return Scope{}, errors.New("a subparsing group has not been closed properly")
+	}
+	var scope *Scope = itemGroup.(*Scope)
+	return *scope, nil
+
+}
+
+func tokenListToParseQueue(tokens []Token) Queue {
+	queue := Queue{}
+	for _, token := range tokens {
+		queue.push(token)
+	}
+	queue.push(Token{
+		Type:  CurlyBrackets,
+		Value: "}",
+	})
+	return queue
 }
 
 /*
