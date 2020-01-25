@@ -1,9 +1,10 @@
-package main
+package files
 
 import (
 	"bufio"
 	"errors"
 	"fmt"
+	"github.com/jschaefer-io/feline/parser"
 	"os"
 	"path"
 	"path/filepath"
@@ -18,10 +19,10 @@ type File struct {
 
 type line struct {
 	number int
-	tokens []Token
+	tokens []parser.Token
 }
 
-func NewFile(filePath string) File {
+func New(filePath string) File {
 	absPath, _ := filepath.Abs(filePath)
 	basename := path.Base(filePath)
 	return File{
@@ -49,14 +50,14 @@ func (file *File) addLine(command *string, number int) error {
 		number: number,
 	}
 	escapedCommand := handleEscapedChars(command)
-	commandLexer := NewLexer(&escapedCommand)
+	commandLexer := parser.NewLexer(&escapedCommand)
 	err := commandLexer.Tokenize()
 	if err != nil {
 		errorText := fmt.Sprintf("parse error at line %d in %s\n", newLine.number, file.path)
 		errorText += err.Error()
 		return errors.New(errorText)
 	}
-	for _, token := range commandLexer.tokens {
+	for _, token := range commandLexer.Tokens {
 		newLine.tokens = append(newLine.tokens, token)
 	}
 	if len(newLine.tokens) > 0 {
@@ -65,8 +66,8 @@ func (file *File) addLine(command *string, number int) error {
 	return nil
 }
 
-func (file *File) GetTokenList() []Token {
-	var tokens []Token
+func (file *File) GetTokenList() []parser.Token {
+	var tokens []parser.Token
 	for _, line := range file.lines {
 		tokens = append(tokens, line.tokens...)
 	}

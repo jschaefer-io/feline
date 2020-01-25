@@ -1,50 +1,50 @@
-package main
+package parser
 
 import (
 	"errors"
 )
 
 type Lexer struct {
-	position int
-	command  string
-	tokens   []Token
-	length   int
+	Position int
+	Command  string
+	Tokens   []Token
+	Length   int
 }
 
 func NewLexer(command *string) Lexer {
 	return Lexer{
-		position: -1,
-		command:  *command,
-		length:   len(*command),
+		Position: -1,
+		Command:  *command,
+		Length:   len(*command),
 	}
 }
 
 func (lexer *Lexer) GetCharAt(position int) (rune, error) {
-	if position < 0 || position >= lexer.length {
+	if position < 0 || position >= lexer.Length {
 		return ' ', errors.New("undefined char index")
 	}
-	return rune(lexer.command[position]), nil
+	return rune(lexer.Command[position]), nil
 }
 
 func (lexer *Lexer) GetTokenAt(position int) (Token, error) {
-	if position < 0 || position >= len(lexer.tokens) {
+	if position < 0 || position >= len(lexer.Tokens) {
 		return Token{}, errors.New("undefined token index")
 	}
-	return lexer.tokens[position], nil
+	return lexer.Tokens[position], nil
 }
 
 func (lexer *Lexer) handlePosition() error {
-	token, offset, err := NextToken(&lexer.command, &lexer.position, &lexer.length)
+	token, offset, err := NextToken(&lexer.Command, &lexer.Position, &lexer.Length)
 	if token.Type != Whitespace {
-		lexer.tokens = append(lexer.tokens, token)
+		lexer.Tokens = append(lexer.Tokens, token)
 	}
-	lexer.position += offset
+	lexer.Position += offset
 	return err
 }
 
 func (lexer *Lexer) increment() bool {
-	lexer.position++
-	return lexer.position < lexer.length
+	lexer.Position++
+	return lexer.Position < lexer.Length
 }
 
 func (lexer *Lexer) Tokenize() error {

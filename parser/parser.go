@@ -1,6 +1,9 @@
-package main
+package parser
 
-import "errors"
+import (
+	"errors"
+	"github.com/jschaefer-io/feline/data_types"
+)
 
 type Item interface{}
 
@@ -53,7 +56,7 @@ func testSubParse(token Token, tokenType TokenType, compare string) (bool, bool)
 	return true, false
 }
 
-func buildSubParses(token *Token, tokens *Queue) (ItemGroup, error, bool) {
+func buildSubParses(token *Token, tokens *data_types.Queue) (ItemGroup, error, bool) {
 	var con bool
 	var subScope bool
 
@@ -70,9 +73,9 @@ func buildSubParses(token *Token, tokens *Queue) (ItemGroup, error, bool) {
 	return nil, nil, false
 }
 
-func NewParse(tokens *Queue, item ItemGroup) (ItemGroup, error) {
-	for tokens.len() > 0 {
-		tokenInterface, _ := tokens.pop()
+func NewParse(tokens *data_types.Queue, item ItemGroup) (ItemGroup, error) {
+	for tokens.Len() > 0 {
+		tokenInterface, _ := tokens.Pop()
 		token := tokenInterface.(Token)
 
 		parse, err, useParse := buildSubParses(&token, tokens)
