@@ -3,46 +3,29 @@ package parser
 import (
 	"errors"
 	"github.com/jschaefer-io/feline/data_types"
+	"github.com/jschaefer-io/feline/lexer"
 )
-
-type Item interface{}
-
-type ItemGroup interface {
-	add(item Item)
-}
-
-type Group struct {
-	Items []Item
-}
-
-func (group *Group) add(item Item) {
-	group.Items = append(group.Items, item)
-}
-
-type Scope struct {
-	Group
-}
 
 type SubParse struct {
 	getInstance func() ItemGroup
 	endChar     string
-	tokenType   TokenType
+	tokenType   lexer.TokenType
 }
 
 var subParses = [...]SubParse{
 	{
 		getInstance: func() ItemGroup { return &Scope{} },
 		endChar:     "}",
-		tokenType:   CurlyBrackets,
+		tokenType:   lexer.CurlyBrackets,
 	},
 	{
 		getInstance: func() ItemGroup { return &Group{} },
 		endChar:     ")",
-		tokenType:   Parenthesis,
+		tokenType:   lexer.Parenthesis,
 	},
 }
 
-func testSubParse(token Token, tokenType TokenType, compare string) (bool, bool) {
+func testSubParse(token lexer.Token, tokenType lexer.TokenType, compare string) (bool, bool) {
 	if token.Type == tokenType {
 		if token.Value == compare {
 			// SubParse should end here
@@ -56,7 +39,7 @@ func testSubParse(token Token, tokenType TokenType, compare string) (bool, bool)
 	return true, false
 }
 
-func buildSubParses(token *Token, tokens *data_types.Queue) (ItemGroup, error, bool) {
+func buildSubParses(token *lexer.Token, tokens *data_types.Queue) (ItemGroup, error, bool) {
 	var con bool
 	var subScope bool
 
@@ -64,7 +47,7 @@ func buildSubParses(token *Token, tokens *data_types.Queue) (ItemGroup, error, b
 		con, subScope = testSubParse(*token, subParse.tokenType, subParse.endChar)
 		if !con {
 			if subScope {
-				item, err := NewParse(tokens, subParse.getInstance())
+				item, err := Parse(tokens, subParse.getInstance())
 				return item, err, true
 			}
 			return nil, nil, true
@@ -73,10 +56,10 @@ func buildSubParses(token *Token, tokens *data_types.Queue) (ItemGroup, error, b
 	return nil, nil, false
 }
 
-func NewParse(tokens *data_types.Queue, item ItemGroup) (ItemGroup, error) {
+func Parse(tokens *data_types.Queue, item ItemGroup) (ItemGroup, error) {
 	for tokens.Len() > 0 {
 		tokenInterface, _ := tokens.Pop()
-		token := tokenInterface.(Token)
+		token := tokenInterface.(lexer.Token)
 
 		parse, err, useParse := buildSubParses(&token, tokens)
 		if err != nil {

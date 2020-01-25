@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
-	"github.com/jschaefer-io/feline/parser"
+	"github.com/jschaefer-io/feline/lexer"
 	"os"
 	"path"
 	"path/filepath"
@@ -19,7 +19,7 @@ type File struct {
 
 type line struct {
 	number int
-	tokens []parser.Token
+	tokens []lexer.Token
 }
 
 func New(filePath string) File {
@@ -50,7 +50,7 @@ func (file *File) addLine(command *string, number int) error {
 		number: number,
 	}
 	escapedCommand := handleEscapedChars(command)
-	commandLexer := parser.NewLexer(&escapedCommand)
+	commandLexer := lexer.New(&escapedCommand)
 	err := commandLexer.Tokenize()
 	if err != nil {
 		errorText := fmt.Sprintf("parse error at line %d in %s\n", newLine.number, file.path)
@@ -66,8 +66,8 @@ func (file *File) addLine(command *string, number int) error {
 	return nil
 }
 
-func (file *File) GetTokenList() []parser.Token {
-	var tokens []parser.Token
+func (file *File) GetTokenList() []lexer.Token {
+	var tokens []lexer.Token
 	for _, line := range file.lines {
 		tokens = append(tokens, line.tokens...)
 	}

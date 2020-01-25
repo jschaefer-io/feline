@@ -1,4 +1,4 @@
-package parser
+package lexer
 
 import (
 	"errors"
@@ -11,7 +11,7 @@ type Lexer struct {
 	Length   int
 }
 
-func NewLexer(command *string) Lexer {
+func New(command *string) Lexer {
 	return Lexer{
 		Position: -1,
 		Command:  *command,
