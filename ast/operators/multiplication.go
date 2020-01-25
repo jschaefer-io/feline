@@ -8,13 +8,13 @@ import (
 
 type Multiplication struct{}
 
-func (mul *Multiplication) Calculate(a literals.Literal, b literals.Literal) (interface{}, error) {
+func (mul *Multiplication) Calculate(a literals.Literal, b literals.Literal) (interface{}, error, literals.LiteralType) {
 	typeA := a.GetType()
 	typeB := b.GetType()
 	if typeA != literals.Number || typeB != literals.Number {
-		return 0, errors.New(fmt.Sprintf("operator not defined for type %d on %d", typeA, typeB))
+		return 0, errors.New(fmt.Sprintf("operator not defined for type %d on %d", typeA, typeB)), literals.Unknown
 	}
 	valA, _ := a.Get()
 	valB, _ := b.Get()
-	return valA.(float64) * valB.(float64), nil
+	return valA.(float64) * valB.(float64), nil, literals.Number
 }

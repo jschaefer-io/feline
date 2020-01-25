@@ -3,7 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
-	"github.com/jschaefer-io/feline/ast"
+	"github.com/jschaefer-io/feline/ast/expression"
 	"github.com/jschaefer-io/feline/ast/literals"
 	"github.com/jschaefer-io/feline/ast/operators"
 	"github.com/jschaefer-io/feline/data_types"
@@ -36,13 +36,17 @@ func buildAst(scope *parser.Scope) {
 	a := literals.NewBooleanLiteral(true)
 	b := literals.NewCharLiteral('C')
 	op := operators.Addition{}
-	exp := ast.BinaryExpression{&op, &a, &b}
+	exp := expression.BinaryExpression{&op, &a, &b}
 
-	res, err := exp.Get()
-	if err != nil {
-		panic(err)
+	literal, errExp := exp.Get()
+	res, errValue := literal.Get()
+	if errExp != nil {
+		panic(errExp)
 	}
-	fmt.Println(res)
+	if errValue != nil {
+		panic(errValue)
+	}
+	fmt.Println(res, literal.GetType())
 }
 
 func parseFile(file files.File) (parser.Scope, error) {

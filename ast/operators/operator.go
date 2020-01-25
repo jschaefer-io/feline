@@ -6,5 +6,5 @@ import (
 
 // Operator
 type Operator interface {
-	Calculate(a literals.Literal, b literals.Literal) (interface{}, error)
+	Calculate(a literals.Literal, b literals.Literal) (interface{}, error, literals.LiteralType)
 }

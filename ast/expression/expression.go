@@ -1,4 +1,4 @@
-package ast
+package expression
 
 import "github.com/jschaefer-io/feline/ast/literals"
 
