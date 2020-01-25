@@ -31,7 +31,7 @@ func main() {
 }
 
 func buildAst(scope *parser.Scope) {
-	a := ast.NewStringLiteral(200)
+	a := ast.NewStringLiteral("Number of hours: ")
 	b := ast.NewNumberLiteral(100)
 	op := ast.Addition{}
 	exp := ast.BinaryExpression{op, &a, &b}
