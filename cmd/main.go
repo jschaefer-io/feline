@@ -1,9 +1,9 @@
 package main
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/jschaefer-io/feline/ast"
 	"github.com/jschaefer-io/feline/data_types"
 	"github.com/jschaefer-io/feline/files"
 	"github.com/jschaefer-io/feline/lexer"
@@ -24,8 +24,23 @@ func main() {
 		panic(parseError)
 	}
 
-	bytes, _ := json.MarshalIndent(scope, "", "\t")
-	fmt.Println(string(bytes))
+	//bytes, _ := json.MarshalIndent(scope, "", "\t")
+	//fmt.Println(string(bytes))
+
+	buildAst(&scope)
+}
+
+func buildAst(scope *parser.Scope) {
+	a := ast.NewStringLiteral(200)
+	b := ast.NewNumberLiteral(100)
+	op := ast.Addition{}
+	exp := ast.BinaryExpression{op, &a, &b}
+
+	res, err := exp.Get()
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(res)
 }
 
 func parseFile(file files.File) (parser.Scope, error) {
